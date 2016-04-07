@@ -13,7 +13,11 @@ namespace ProjectPortflio1
     public partial class Form1 : Form
     {
 
-        Cell[,] universe = new Cell[5, 5];
+        Cell[,] universe = new Cell[15 , 15];
+
+        int width, height, alive = 0;
+
+        Dictionary<int, Cell[,]> history = new Dictionary<int, Cell[,]>();
 
         //Boolean[,] universe = new Boolean[5,5];
 
@@ -41,7 +45,10 @@ namespace ProjectPortflio1
             timer.Enabled = false;
             timer.Tick += timer1_Tick;
 
-            toolStripStatusLabel1.Text = "Generations: 0";
+            width = 15;
+            height = 15;
+
+            toolStripStatusLabel1.Text = "Generations " + generations.ToString() + " | Alive : " + alive;
 
         }
 
@@ -49,29 +56,15 @@ namespace ProjectPortflio1
         {
             float width = graphicsPanel1.ClientSize.Width / universe.GetLength((int)dimensions.x);
             float height = (graphicsPanel1.ClientSize.Height / universe.GetLength((int)dimensions.y));
-            
-            for (int x = 0; x < universe.GetLength((int)dimensions.x); x++)
+
+            for (int i = 0; i < universe.GetLength((int)dimensions.x); i++)
             {
-                for (int y = 0; y < universe.GetLength((int)dimensions.y); y++)
+                for (int j = 0; j < universe.GetLength((int)dimensions.y); j++)
                 {
-                    float rx = (float)(x * width);
-                    float ry = (float)(y * height);
+                    float rx = (float)(i * width);
+                    float ry = (float)(j * height);
 
-                    universe[x, y].updateNearby(universe);
-
-                    if (timer.Enabled)
-                    {
-                        if(universe[x,y].Total == 3 || universe[x,y].Total == 2)
-                        {
-                            universe[x, y].Alive = true;
-                        }
-                        else
-                        {
-                            universe[x, y].Alive = false;
-                        }
-                    }
-
-                    if (universe[x, y].Alive)
+                    if (universe[i,j].Alive)
                     {
 
                         e.Graphics.FillRectangle(Brushes.Red, new Rectangle((int)rx, (int)ry, (int)width, (int)height));
@@ -81,76 +74,74 @@ namespace ProjectPortflio1
                         e.Graphics.DrawRectangle(Pens.Black, new Rectangle((int)rx, (int)ry, (int)width, (int)height));
                     }
 
-
-                    /*
-                    //Draw Cell
-                    if (universe[x, y].Alive)
-                    {
-                        universe[x, y].nearbyCells(universe);
-                        if (universe[x,y].Total == 0)
-                        {
-                            Font font = new Font("Arial", 25f);
-
-                            StringFormat stringFormat = new StringFormat();
-                            stringFormat.Alignment = StringAlignment.Center;
-                            stringFormat.LineAlignment = StringAlignment.Center;
-
-                            Rectangle rect = new Rectangle((int)rx, (int)ry, (int)width, (int)height);
-                            e.Graphics.FillRectangle(Brushes.Red, rect);
-
-                            e.Graphics.DrawString(universe[x,y].Total + "", font, Brushes.Black, rect, stringFormat);
-
-                        }else if (universe[x, y].Total == 1)
-                        {
-                            Font font = new Font("Arial", 25f);
-
-                            StringFormat stringFormat = new StringFormat();
-                            stringFormat.Alignment = StringAlignment.Center;
-                            stringFormat.LineAlignment = StringAlignment.Center;
-
-                            Rectangle rect = new Rectangle((int)rx, (int)ry, (int)width, (int)height);
-                            e.Graphics.FillRectangle(Brushes.Orange, rect);
-
-                            e.Graphics.DrawString(universe[x, y].Total + "", font, Brushes.Black, rect, stringFormat);
-                        }
-                        else if(universe[x, y].Total == 2)
-                        {
-                            Font font = new Font("Arial", 25f);
-
-                            StringFormat stringFormat = new StringFormat();
-                            stringFormat.Alignment = StringAlignment.Center;
-                            stringFormat.LineAlignment = StringAlignment.Center;
-
-                            Rectangle rect = new Rectangle((int)rx, (int)ry, (int)width, (int)height);
-                            e.Graphics.FillRectangle(Brushes.Yellow, rect);
-
-                            e.Graphics.DrawString(universe[x, y].Total + "", font, Brushes.Black, rect, stringFormat);
-                        }
-                        else if (universe[x, y].Total >= 3)
-                        {
-                            Font font = new Font("Arial", 25f);
-
-                            StringFormat stringFormat = new StringFormat();
-                            stringFormat.Alignment = StringAlignment.Center;
-                            stringFormat.LineAlignment = StringAlignment.Center;
-
-                            Rectangle rect = new Rectangle((int)rx, (int)ry, (int)width, (int)height);
-                            e.Graphics.FillRectangle(Brushes.Green, rect);
-
-                            e.Graphics.DrawString(universe[x, y].Total + "", font, Brushes.Black, rect, stringFormat);
-                        }
-                        else
-                        {
-                            e.Graphics.FillRectangle(Brushes.Black, new Rectangle((int)rx, (int)ry, (int)width, (int)height));
-                        }
-                    }
-                    */
-
-
-                    //Draw Grid
-
                 }
             }
+
+            toolStripStatusLabel1.Text = "Generations " + generations.ToString() + " | Alive : " + alive;
+
+        }
+        /*
+                Font font = new Font("Arial", 25f);
+
+                StringFormat stringFormat = new StringFormat();
+                stringFormat.Alignment = StringAlignment.Center;
+                stringFormat.LineAlignment = StringAlignment.Center;
+
+                Rectangle rect = new Rectangle((int)rx, (int)ry, (int)width, (int)height);
+                e.Graphics.FillRectangle(Brushes.Red, rect);
+
+                e.Graphics.DrawString(universe[x,y].Total + "", font, Brushes.Black, rect, stringFormat);
+        */
+
+
+        public void update()
+        {
+            alive = 0;
+
+            Cell[,] temp = new Cell[width, height];
+
+            for (int x = 0; x < temp.GetLength((int)dimensions.x); x++)
+            {
+                for (int y = 0; y < temp.GetLength((int)dimensions.y); y++)
+                {
+                    temp[x, y] = new Cell(false,x, y);
+                }
+            }
+            
+
+            for (int x = 0; x < universe.GetLength((int)dimensions.x); x++)
+            {
+                for (int y = 0; y < universe.GetLength((int)dimensions.y); y++)
+                {
+                    universe[x, y].updateNearby(universe);
+
+                    if (universe[x, y].Total == 3 || (universe[x, y].Total == 2 && universe[x,y].Alive))
+                    {
+                        temp[x, y].Alive = true;
+                        alive++;
+                    }
+                    else
+                    {
+                        temp[x, y].Alive = false;
+                    }
+                }
+            }
+            if (history.ContainsKey(generations))
+            {
+                history[generations] = universe;
+            }
+            else
+            {
+                history.Add(generations, universe);
+            }
+
+            universe = temp;
+
+            generations++;
+
+            toolStripStatusLabel1.Text = "Generations " + generations.ToString() + " | Alive : " + alive;
+
+            graphicsPanel1.Invalidate();
         }
 
         //Called when a cell is clicked
@@ -166,41 +157,99 @@ namespace ProjectPortflio1
 
                 universe[(int)sx, (int)sy].Alive = !universe[(int)sx, (int)sy].Alive;
 
+                if (universe[(int)sx, (int)sy].Alive)
+                {
+                    alive++;
+                }
+                else
+                {
+                    alive--;
+                }
+
                 graphicsPanel1.Invalidate();
             }
         }
 
+        //Timer Function called every Tick
         private void timer1_Tick(object sender, EventArgs e)
         {
-            generations++;
-
-            toolStripStatusLabel1.Text = "Generations: " + generations.ToString();
-
-            graphicsPanel1.Invalidate();
+            update();
         }
 
+        //New Grid - Lets you pick grid size / Colors (TODO)
         private void newToolStripMenuItem_Click(object sender, EventArgs e)
         {
             generations = 0;
 
-            toolStripStatusLabel1.Text = "Generations " + generations.ToString();
-            
-            graphicsPanel1.Invalidate();
+            update();
         }
 
-        private void toolStripButton3_Click(object sender, EventArgs e)
+        //Run button
+        private void Run(object sender, EventArgs e)
         {
             timer.Enabled = true;
         }
 
-        private void toolStripButton2_Click(object sender, EventArgs e)
+        //Step Button
+        private void Step(object sender, EventArgs e)
         {
-            timer1_Tick(sender, e);
+            update();
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        //Stop Button
+        private void Stop(object sender, EventArgs e)
         {
             timer.Enabled = false;
+        }
+
+        //Menu Clear
+        private void MenuClear(object sender, EventArgs e)
+        {
+            clear();
+        }
+        //Customize the size of the grid and time between each tick.
+        private void customizeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void goBack_Click(object sender, EventArgs e)
+        {
+
+            if (history.ContainsKey(generations - 1))
+            {
+                timer.Enabled = false;
+                if (generations - 1 != -1)
+                {                    
+
+                    universe = history[generations - 1];
+
+                    generations--;
+
+                    graphicsPanel1.Invalidate();
+
+                }
+            }
+        }
+
+        //Clear Button
+        private void ClearButton(object sender, EventArgs e)
+        {
+            clear();
+        }
+
+        //Clear Function
+        public void clear()
+        {
+            for (int x = 0; x < universe.GetLength((int)dimensions.x); x++)
+            {
+                for (int y = 0; y < universe.GetLength((int)dimensions.y); y++)
+                {
+                    universe[x, y] = new Cell(false, x, y);
+                }
+            }
+
+            graphicsPanel1.Invalidate();
         }
     }
 }
